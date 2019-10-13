@@ -6,7 +6,7 @@ echo ##### removed docker image
 cd MyApp
 
 echo ##### building docker image
-call mvnw docker:build
+call mvnw package docker:build
 cd ..
 echo ##### created docker image
 

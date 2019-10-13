@@ -6,7 +6,7 @@ echo "##### removed docker image"
 cd MyApp
 
 echo "##### building docker image"
-./mvnw docker:build
+./mvnw package docker:build
 cd ..
 echo "##### created docker image"
 
