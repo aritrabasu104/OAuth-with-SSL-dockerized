@@ -22,7 +22,6 @@ echo ##### created docker image
 
 echo ##### preparing upload image to repo
 aws ecr delete-repository --repository-name ubi-repo-cli --force >nul
-
 for /f "delims=" %%F in ('aws ecr get-login --no-include-email --region %region%') do %%F%
 aws ecr create-repository --repository-name ubi-repo-cli >nul
 echo ##### tagging image and starting upload
