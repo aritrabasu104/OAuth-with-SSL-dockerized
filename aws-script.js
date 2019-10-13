@@ -1,20 +1,23 @@
 var AWS = require("aws-sdk");
 const log = console.log;
-AWS.config.update({ region: 'us-east-2' });
+regionProvided = process.argv[2];
+accoundId = process.argv[3];
+// region not reflected correctly in node sdk
+AWS.config.update({ region: regionProvided });
 var ecs = new AWS.ECS();
 
 var clusterParams = {
   clusterName: "ubi_cluster_node"
 };
 var taskParams = {
-  executionRoleArn: "arn:aws:iam::203462236004:role/ecsTaskExecutionRole",
+  executionRoleArn: "arn:aws:iam::"+accoundId+":role/ecsTaskExecutionRole",
   containerDefinitions: [
     {
       logConfiguration: {
         logDriver: "awslogs",
         options: {
           "awslogs-group": "/ecs/ubi-task",
-          "awslogs-region": "us-east-2",
+          "awslogs-region": regionProvided,
           "awslogs-stream-prefix": "ecs"
         }
       },
@@ -31,13 +34,13 @@ var taskParams = {
         }
       ],
       essential: true,
-      image: "203462236004.dkr.ecr.us-east-2.amazonaws.com/ubisoft-sample:latest",
+      image: accoundId+".dkr.ecr."+regionProvided+".amazonaws.com/ubisoft-sample:latest",
       memoryReservation: 100,
       name: "ubisoft-cont"
     }
   ],
   memory: "1024",
-  taskRoleArn: "arn:aws:iam::203462236004:role/ecsTaskExecutionRole",
+  taskRoleArn: "arn:aws:iam::"+accoundId+":role/ecsTaskExecutionRole",
   family: "ubi-task",
   requiresCompatibilities: [
     "FARGATE"

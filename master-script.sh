@@ -31,5 +31,5 @@ npm i
 echo "##### installation completed"
 
 echo "##### invoking aws script"
-node aws-script.js
+node aws-script.js $region $account_id
 echo "##### aws script completed - exiting"
