@@ -24,8 +24,8 @@ public class SwaggerConfig {
 
 	private ApiInfo metaInfo() {
 		ApiInfo apiInfo = new ApiInfo(
-                "Spring Boot Swagger Example API",
-                "Spring Boot Swagger Example API for Youtube",
+                "Ubisoft Player Info API",
+                "Ubisoft Leaderboard and Player Info API challenge",
                 "1.0",
                 "Terms of Service",
                 new Contact("Aritra Basu", "https://www.linkedin.com/in/aritra-basu-full-stack/",

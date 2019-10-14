@@ -15,7 +15,7 @@ import org.springframework.core.env.Environment;
 
 @SpringBootApplication
 @EnableOAuth2Sso
-public class MyAppApplication {
+public class MyAppController {
 	
 	@Autowired
 	private Environment env;
@@ -24,7 +24,7 @@ public class MyAppApplication {
 	private static final String SERVER_HTTP_PORT_PROP_NAME = "server.http.port";
 	
 	public static void main(String[] args) {
-		SpringApplication.run(MyAppApplication.class, args);
+		SpringApplication.run(MyAppController.class, args);
 	}
 
 	@Bean
