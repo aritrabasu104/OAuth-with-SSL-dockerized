@@ -20,7 +20,7 @@ echo %printline_start% removed docker image
 
 echo %printline_start% building docker image
 cd MyApp
-call mvnw package docker:build 
+call mvnw package docker:build "-Dimage_name=%image_name%"
 cd ..
 echo %printline_start% created docker image
 

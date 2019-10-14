@@ -17,7 +17,7 @@ echo "$printline_start removed docker image"
 
 echo "$printline_start building docker image"
 cd MyApp
-./mvnw package docker:build
+./mvnw package docker:build "-Dimage_name=$image_name"
 cd ..
 echo "$printline_start created docker image"
 
