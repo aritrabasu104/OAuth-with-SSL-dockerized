@@ -16,5 +16,3 @@ API doc can be found at https://localhost:8443/swagger-ui.html
 
 #### Code assumptions : 
 Match names are unique and multiple match instances of the same type will have unique name.
-
-"Final commit ID" :0e866a9
