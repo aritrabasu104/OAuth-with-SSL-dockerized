@@ -51,10 +51,10 @@ public class PlayerResource {
 		}
 	}
 
-	@ApiOperation(value = "Returns leaderboard for a specific matchName optionally within the time limit")
+	@ApiOperation(value = "Returns leaderboard for a specific matchName within the time limit")
 	@GetMapping("/LeaderBoard")
 	public ResponseEntity<?> getLeaderBoardForMatchName(@Valid @NotBlank @RequestParam String matchName,
-			@Min(value = 0, message = "timeInMillis should be positive number") @RequestParam(defaultValue = "0") Long timeInMillis) {
+			@Min(value = 0, message = "timeInMillis should be positive number") @RequestParam Long timeInMillis) {
 		try {
 			return ResponseEntity.ok().body(leaderboardService.getLeaderBoard(matchName, timeInMillis).parallelStream()
 					.map(this::convertToDashboardDto).collect(Collectors.toList()));
@@ -65,7 +65,7 @@ public class PlayerResource {
 		}
 	}
 
-	@ApiOperation(value = "Returns leaderboard for a player optionally filtering on the match")
+	@ApiOperation(value = "Returns leaderboard for a player filtering on the match")
 	@GetMapping("/LeaderBoard/{id}")
 	public ResponseEntity<?> getAdjecentScores(
 			@Valid @NotNull @Min(value = 1, message = "id should be positive number") @PathVariable("id") Long playerId,
@@ -96,13 +96,13 @@ public class PlayerResource {
 		}
 	}
 
-	@ApiOperation(value = "Returns player stats for a specific matchName optionally within the time limit")
+	@ApiOperation(value = "Returns player stats for a specific matchName within the time limit")
 	@GetMapping("/playersStats")
 	public ResponseEntity<?> getLPlayerStatForMatchName(@Valid @NotBlank @RequestParam String matchName,
-			@Min(value = 0, message = "timeInMillis should be positive number") @RequestParam(defaultValue = "0") Long timeInMillis) {
+			@Min(value = 0, message = "timeInMillis should be positive number") @RequestParam Long timeInMillis) {
 		try {
-			return ResponseEntity.ok().body(leaderboardService.getLeaderBoard(matchName, timeInMillis).parallelStream()
-					.map(this::convertToDashboardDto).collect(Collectors.toList()));
+			return ResponseEntity.ok().body(playerService.getPlayerStatsForMatch(matchName, timeInMillis).parallelStream()
+					.map(this::convertToMatchDto).collect(Collectors.toList()));
 		} catch (DataAccessException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		} catch (InvalidMatchNameException e) {

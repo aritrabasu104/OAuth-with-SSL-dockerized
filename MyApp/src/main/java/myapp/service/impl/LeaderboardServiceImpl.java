@@ -33,10 +33,9 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 		Map<Player, PlayerStats> map = new ConcurrentHashMap<>();
 		Match match;
 		try {
-			// finding matches that started after a given date
-			match = matchRepository.findByMatchName(matchName).parallelStream().findFirst().get();
-		} catch (NoSuchElementException e) {
-			throw new InvalidMatchNameException();
+			match = matchRepository.findByMatchName(matchName).get(0);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			throw new InvalidMatchNameException(matchName);
 		}
 		// for match find the best stat of the player
 		statsRepository.findByMatch(match).parallelStream().filter(item -> item.getStatTime().getTime() > timeInMillis)
@@ -59,10 +58,9 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 		Map<Player, PlayerStats> map = new ConcurrentHashMap<>();
 		Match match;
 		try {
-			// finding matches that started after a given date
-			match = matchRepository.findByMatchName(matchName).parallelStream().findFirst().get();
-		} catch (NoSuchElementException e) {
-			throw new InvalidMatchNameException();
+			match = matchRepository.findByMatchName(matchName).get(0);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			throw new InvalidMatchNameException(matchName);
 		}
 		// for match find the best stat of the player
 		statsRepository.findByMatch(match).parallelStream().forEach(stat -> {
@@ -78,7 +76,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 		try {
 			playerStats = list.parallelStream().filter(item -> item.getPlayer().getId() == playerId).findFirst().get();
 		} catch (NoSuchElementException e) {
-			throw new InvalidPlayerException();
+			throw new InvalidPlayerException(playerId);
 		}
 		int index = list.indexOf(playerStats);
 		int fromIndex = index > 2 ? index - 2 : 0;

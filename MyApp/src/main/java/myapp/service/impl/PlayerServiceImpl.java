@@ -2,6 +2,7 @@ package myapp.service.impl;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,12 +35,12 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	public List<PlayerStats> getPlayerStats(Long id) throws InvalidPlayerException {
+	public List<PlayerStats> getPlayerStats(Long playerId) throws InvalidPlayerException {
 		Player player;
 		try {
-		 player = playerRepository.findById(id).get();
-		}catch (NoSuchElementException e) {
-			throw new InvalidPlayerException();
+			player = playerRepository.findById(playerId).get();
+		} catch (NoSuchElementException e) {
+			throw new InvalidPlayerException(playerId);
 		}
 		return statsRepository.findByPlayer(player);
 	}
@@ -49,11 +50,11 @@ public class PlayerServiceImpl implements PlayerService {
 			throws InvalidMatchNameException {
 		Match match;
 		try {
-		match = matchRepository.findByMatchName(matchName).get(0);
-		}catch (ArrayIndexOutOfBoundsException e) {
-			throw new InvalidMatchNameException();
+			match = matchRepository.findByMatchName(matchName).get(0);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			throw new InvalidMatchNameException(matchName);
 		}
-		return null;
+		return statsRepository.findByMatch(match).stream().filter(stat->stat.getStatTime().getTime()>timeInMilis).collect(Collectors.toList());
 	}
 
 }
