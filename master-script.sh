@@ -1,35 +1,39 @@
-#!/bin/sh
+#!/bin/bash
 
-echo "##### checking aws region,account_id"
+printline_start="#####"
+echo "$printline_start initializing aws region, account_id, repo_name, image_name, image_tag"
 region="$(aws configure get region)"
 temp="$(aws sts get-caller-identity --output text)"
 account_id=${temp:0:12}
+repo_name="ubi-repo-cli"
+image_name="ubisoft-sample-ssh"
+image_tag="latest"
+echo "$printline_start using region=$region, account_id=$account_id, repo_name=$repo_name, image_name=$image_name, image_tag=$image_tag"
 
-echo "##### cleaning docker image"
-docker rmi $account_id.dkr.ecr.$region.amazonaws.com/ubi-repo-cli:latest 
-docker rmi $(docker images -q ubisoft-sample-ssh) 
-echo "##### removed docker image"
+echo "$printline_start cleaning docker image"
+docker rmi $account_id.dkr.ecr.$region.amazonaws.com/$repo_name:$image_tag 
+docker rmi $(docker images -q $image_name) 
+echo "$printline_start removed docker image"
 
+echo "$printline_start building docker image"
 cd MyApp
-
-echo "##### building docker image"
 ./mvnw package docker:build
 cd ..
-echo "##### created docker image"
+echo "$printline_start created docker image"
 
-echo "##### preparing upload image to repo"
-aws ecr delete-repository --repository-name ubi-repo-cli --force > /dev/null
+echo "$printline_start preparing upload image to repo"
+aws ecr delete-repository --repository-name $repo_name --force > /dev/null
 $(aws ecr get-login --no-include-email --region "$region")
-aws ecr create-repository --repository-name ubi-repo-cli > /dev/null
-echo "##### tagging image and starting upload"
-docker tag ubisoft-sample-ssh:latest $account_id.dkr.ecr.$region.amazonaws.com/ubi-repo-cli:latest >nul
-docker push $account_id.dkr.ecr.$region.amazonaws.com/ubi-repo-cli:latest
-echo "##### uploaded docker image"
+aws ecr create-repository --repository-name $repo_name > /dev/null
+echo "$printline_start tagging image and starting upload"
+docker tag $image_name:$image_tag $account_id.dkr.ecr.$region.amazonaws.com/$repo_name:$image_tag >nul
+docker push $account_id.dkr.ecr.$region.amazonaws.com/$repo_name:$image_tag
+echo "$printline_start uploaded docker image"
 
-echo "##### installing node modules if required"
+echo "$printline_start installing node modules if required"
 npm i
-echo "##### installation completed"
+echo "$printline_start installation completed"
 
-echo "##### invoking aws script"
-node aws-script.js $region $account_id
-echo "##### aws script completed - exiting"
+echo "$printline_start invoking aws script"
+node aws-script.js $region $account_id $repo_name $image_tag
+echo "$printline_start aws script completed - exiting"

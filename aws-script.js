@@ -2,6 +2,9 @@ var AWS = require("aws-sdk");
 const log = console.log;
 regionProvided = process.argv[2];
 accoundId = process.argv[3];
+repo_name=process.argv[4];
+image_tag=process.argv[5];
+
 // region not reflected correctly in node sdk
 AWS.config.update({ region: regionProvided });
 var ecs = new AWS.ECS();
@@ -34,7 +37,7 @@ var taskParams = {
         }
       ],
       essential: true,
-      image: accoundId+".dkr.ecr."+regionProvided+".amazonaws.com/ubisoft-sample:latest",
+      image: accoundId+".dkr.ecr."+regionProvided+".amazonaws.com/"+repo_name+":"+image_tag,
       memoryReservation: 100,
       name: "ubisoft-cont"
     }
@@ -84,7 +87,8 @@ ecs.createCluster(clusterParams, function (err, data) {
     if (err) log(err, err.stack); // an error occurred
     //else log(data);
   })
-}).then(() => {
+})
+.then(() => {
 
   ecs.listServices({ cluster: serviceParams.cluster }, function (err, data) {
     if (err) log(err, err.stack); // an error occurred
@@ -108,7 +112,7 @@ ecs.createCluster(clusterParams, function (err, data) {
       });
     }
   return flag;
-}).finally((flag) => {
+}).then((flag) => {
   setTimeout(() => ecs.createService(serviceParams, function (err, data) {
     if (err) log(err, err.stack); // an error occurred
     //else log(data);
