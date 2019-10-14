@@ -30,7 +30,14 @@ public class PlayerServiceImpl implements PlayerService {
 	private MatchRepository matchRepository;
 
 	@Override
-	public PlayerStats savePlayerStat(PlayerStats playerStats) {
+	public PlayerStats savePlayerStat(PlayerStats playerStats) throws InvalidMatchNameException {
+		Match match;
+		try {
+			match = matchRepository.findByMatchName(playerStats.getMatch().getMatchName()).get(0);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			throw new InvalidMatchNameException(playerStats.getMatch().getMatchName());
+		}
+		playerStats.setMatch(match);
 		return statsRepository.save(playerStats);
 	}
 
@@ -54,7 +61,8 @@ public class PlayerServiceImpl implements PlayerService {
 		} catch (ArrayIndexOutOfBoundsException e) {
 			throw new InvalidMatchNameException(matchName);
 		}
-		return statsRepository.findByMatch(match).stream().filter(stat->stat.getStatTime().getTime()>timeInMilis).collect(Collectors.toList());
+		return statsRepository.findByMatch(match).stream().filter(stat -> stat.getStatTime().getTime() > timeInMilis)
+				.collect(Collectors.toList());
 	}
 
 }

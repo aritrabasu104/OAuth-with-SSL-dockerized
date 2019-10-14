@@ -119,7 +119,7 @@ public class PlayerStats {
 	 * @param statTime the statTime to set
 	 */
 	public void setStatTime(Date statTime) {
-		this.statTime = new Date();
+		this.statTime = statTime;
 	}
 
 }

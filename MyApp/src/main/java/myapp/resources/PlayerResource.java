@@ -1,5 +1,6 @@
 package myapp.resources;
 
+import java.util.Date;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -24,6 +25,8 @@ import myapp.dto.PlayerStatsDashboardDto;
 import myapp.dto.PlayerStatsMatchDto;
 import myapp.exceptions.InvalidMatchNameException;
 import myapp.exceptions.InvalidPlayerException;
+import myapp.model.Match;
+import myapp.model.Player;
 import myapp.model.PlayerStats;
 import myapp.service.LeaderboardService;
 import myapp.service.PlayerService;
@@ -43,10 +46,14 @@ public class PlayerResource {
 
 	@ApiOperation(value = "saves player statistics")
 	@PostMapping("/playerStat")
-	public ResponseEntity<?> savePlayeStat(@RequestBody PlayerStats playerStats) {
+	public ResponseEntity<?> savePlayeStat(@RequestParam Long id,
+			@RequestBody PlayerStatsMatchDto playerStatsMatchDto) {
 		try {
-			return ResponseEntity.ok().body(playerService.savePlayerStat(playerStats));
+			return ResponseEntity.ok()
+					.body(playerService.savePlayerStat(convertDtoToMatchStatsModel(playerStatsMatchDto, id)));
 		} catch (DataAccessException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (InvalidMatchNameException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
@@ -57,7 +64,7 @@ public class PlayerResource {
 			@Min(value = 0, message = "timeInMillis should be positive number") @RequestParam Long timeInMillis) {
 		try {
 			return ResponseEntity.ok().body(leaderboardService.getLeaderBoard(matchName, timeInMillis).parallelStream()
-					.map(this::convertToDashboardDto).collect(Collectors.toList()));
+					.map(this::convertModelToDashboardStatsDto).collect(Collectors.toList()));
 		} catch (DataAccessException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		} catch (InvalidMatchNameException e) {
@@ -72,7 +79,7 @@ public class PlayerResource {
 			@Valid @NotBlank @RequestParam(required = false) String matchName) {
 		try {
 			return ResponseEntity.ok().body(leaderboardService.getAdjecentScoresForPlayer(playerId, matchName)
-					.parallelStream().map(this::convertToDashboardDto).collect(Collectors.toList()));
+					.parallelStream().map(this::convertModelToDashboardStatsDto).collect(Collectors.toList()));
 		} catch (DataAccessException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		} catch (InvalidPlayerException e) {
@@ -88,7 +95,7 @@ public class PlayerResource {
 			@Valid @NotNull @Min(value = 1, message = "id should be positive number") @PathVariable("id") Long playerId) {
 		try {
 			return ResponseEntity.ok().body(playerService.getPlayerStats(playerId).parallelStream()
-					.map(this::convertToMatchDto).collect(Collectors.toList()));
+					.map(this::convertModelToMatchStatsDto).collect(Collectors.toList()));
 		} catch (DataAccessException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		} catch (InvalidPlayerException e) {
@@ -101,8 +108,8 @@ public class PlayerResource {
 	public ResponseEntity<?> getLPlayerStatForMatchName(@Valid @NotBlank @RequestParam String matchName,
 			@Min(value = 0, message = "timeInMillis should be positive number") @RequestParam Long timeInMillis) {
 		try {
-			return ResponseEntity.ok().body(playerService.getPlayerStatsForMatch(matchName, timeInMillis).parallelStream()
-					.map(this::convertToMatchDto).collect(Collectors.toList()));
+			return ResponseEntity.ok().body(playerService.getPlayerStatsForMatch(matchName, timeInMillis)
+					.parallelStream().map(this::convertModelToMatchStatsDto).collect(Collectors.toList()));
 		} catch (DataAccessException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		} catch (InvalidMatchNameException e) {
@@ -110,16 +117,28 @@ public class PlayerResource {
 		}
 	}
 
-	private PlayerStatsDashboardDto convertToDashboardDto(PlayerStats playerStats) {
+	private PlayerStatsDashboardDto convertModelToDashboardStatsDto(PlayerStats playerStats) {
 		PlayerStatsDashboardDto playerStatsDashboardDto = modelMapper.map(playerStats, PlayerStatsDashboardDto.class);
 		playerStatsDashboardDto.setRank(playerStats.getMatch().getRank());
 		playerStatsDashboardDto.setUserName(playerStats.getPlayer().getUserName());
 		return playerStatsDashboardDto;
 	}
 
-	private PlayerStatsMatchDto convertToMatchDto(PlayerStats playerStats) {
+	private PlayerStatsMatchDto convertModelToMatchStatsDto(PlayerStats playerStats) {
 		PlayerStatsMatchDto playerStatsMatchDto = modelMapper.map(playerStats, PlayerStatsMatchDto.class);
 		playerStatsMatchDto.setMatch(playerStats.getMatch().getMatchName());
 		return playerStatsMatchDto;
+	}
+
+	private PlayerStats convertDtoToMatchStatsModel(PlayerStatsMatchDto playerStatsMatchDto, Long id) {
+		PlayerStats playerStats = modelMapper.map(playerStatsMatchDto, PlayerStats.class);
+		Match match = new Match();
+		match.setMatchName(playerStatsMatchDto.getMatch());
+		playerStats.setStatTime(new Date());
+		Player player = new Player();
+		player.setId(id);
+		playerStats.setMatch(match);
+		playerStats.setPlayer(player);
+		return playerStats;
 	}
 }
