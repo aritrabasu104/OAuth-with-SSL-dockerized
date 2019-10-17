@@ -21,13 +21,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.ApiOperation;
+import myapp.dto.MatchDto;
+import myapp.dto.PlayerDto;
 import myapp.dto.PlayerStatsDashboardDto;
 import myapp.dto.PlayerStatsMatchDto;
 import myapp.exceptions.InvalidMatchNameException;
 import myapp.exceptions.InvalidPlayerException;
+import myapp.exceptions.InvalidPlayerStatException;
 import myapp.model.Match;
 import myapp.model.Player;
-import myapp.model.PlayerStats;
+import myapp.model.PlayerStat;
 import myapp.service.LeaderboardService;
 import myapp.service.PlayerService;
 
@@ -44,16 +47,40 @@ public class PlayerResource {
 	@Autowired
 	private LeaderboardService leaderboardService;
 
+	@ApiOperation(value = "creates player in Database with PlayerName")
+	@PostMapping("/createPlayer")
+	public ResponseEntity<?> createPlayer(@NotBlank @RequestParam String playerName) {
+		try {
+			return ResponseEntity.ok()
+					.body(convertPlayerToPlayerDto(playerService.createPlayer(playerName)));
+		} catch (DataAccessException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} 
+	}
+	
+	@ApiOperation(value = "creates match in Database")
+	@PostMapping("/createMatch")
+	public ResponseEntity<?> createMatch(@NotBlank @RequestParam String matchName) {
+		try {
+			return ResponseEntity.ok()
+					.body(convertMatchToMatchDto(playerService.createMatch(matchName)));
+		} catch (DataAccessException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} 
+	}
+	
 	@ApiOperation(value = "saves player statistics")
 	@PostMapping("/playerStat")
 	public ResponseEntity<?> savePlayeStat(@RequestParam Long id,
 			@RequestBody PlayerStatsMatchDto playerStatsMatchDto) {
 		try {
 			return ResponseEntity.ok()
-					.body(playerService.savePlayerStat(convertDtoToMatchStatsModel(playerStatsMatchDto, id)));
+					.body(convertModelToMatchStatsDto(playerService.savePlayerStat(convertDtoToMatchStatsModel(playerStatsMatchDto, id))));
 		} catch (DataAccessException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		} catch (InvalidMatchNameException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (InvalidPlayerException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
@@ -75,8 +102,8 @@ public class PlayerResource {
 	@ApiOperation(value = "Returns leaderboard for a player filtering on the match")
 	@GetMapping("/LeaderBoard/{id}")
 	public ResponseEntity<?> getAdjecentScores(
-			@Valid @NotNull @Min(value = 1, message = "id should be positive number") @PathVariable("id") Long playerId,
-			@Valid @NotBlank @RequestParam(required = false) String matchName) {
+			@NotNull @Min(value = 1, message = "id should be positive number") @PathVariable("id") Long playerId,
+			@NotBlank @RequestParam(required = false) String matchName) {
 		try {
 			return ResponseEntity.ok().body(leaderboardService.getAdjecentScoresForPlayer(playerId, matchName)
 					.parallelStream().map(this::convertModelToDashboardStatsDto).collect(Collectors.toList()));
@@ -86,13 +113,15 @@ public class PlayerResource {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		} catch (InvalidMatchNameException e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (InvalidPlayerStatException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
 
 	@ApiOperation(value = "Returns stats for a logged in player")
 	@GetMapping("/playersStats/{id}")
 	public ResponseEntity<?> getPlayerStat(
-			@Valid @NotNull @Min(value = 1, message = "id should be positive number") @PathVariable("id") Long playerId) {
+			@NotNull @Min(value = 1, message = "id should be positive number") @PathVariable("id") Long playerId) {
 		try {
 			return ResponseEntity.ok().body(playerService.getPlayerStats(playerId).parallelStream()
 					.map(this::convertModelToMatchStatsDto).collect(Collectors.toList()));
@@ -117,21 +146,20 @@ public class PlayerResource {
 		}
 	}
 
-	private PlayerStatsDashboardDto convertModelToDashboardStatsDto(PlayerStats playerStats) {
-		PlayerStatsDashboardDto playerStatsDashboardDto = modelMapper.map(playerStats, PlayerStatsDashboardDto.class);
-		playerStatsDashboardDto.setRank(playerStats.getMatch().getRank());
-		playerStatsDashboardDto.setUserName(playerStats.getPlayer().getUserName());
+	private PlayerStatsDashboardDto convertModelToDashboardStatsDto(PlayerStat playerStat) {
+		PlayerStatsDashboardDto playerStatsDashboardDto = modelMapper.map(playerStat, PlayerStatsDashboardDto.class);
+		playerStatsDashboardDto.setUserName(playerStat.getPlayer().getUserName());
 		return playerStatsDashboardDto;
 	}
 
-	private PlayerStatsMatchDto convertModelToMatchStatsDto(PlayerStats playerStats) {
+	private PlayerStatsMatchDto convertModelToMatchStatsDto(PlayerStat playerStats) {
 		PlayerStatsMatchDto playerStatsMatchDto = modelMapper.map(playerStats, PlayerStatsMatchDto.class);
 		playerStatsMatchDto.setMatch(playerStats.getMatch().getMatchName());
 		return playerStatsMatchDto;
 	}
 
-	private PlayerStats convertDtoToMatchStatsModel(PlayerStatsMatchDto playerStatsMatchDto, Long id) {
-		PlayerStats playerStats = modelMapper.map(playerStatsMatchDto, PlayerStats.class);
+	private PlayerStat convertDtoToMatchStatsModel(PlayerStatsMatchDto playerStatsMatchDto, Long id) {
+		PlayerStat playerStats = modelMapper.map(playerStatsMatchDto, PlayerStat.class);
 		Match match = new Match();
 		match.setMatchName(playerStatsMatchDto.getMatch());
 		playerStats.setStatTime(new Date());
@@ -141,4 +169,13 @@ public class PlayerResource {
 		playerStats.setPlayer(player);
 		return playerStats;
 	}
+
+	private MatchDto convertMatchToMatchDto(Match match) {
+		return modelMapper.map(match, MatchDto.class);
+	}
+
+	private PlayerDto convertPlayerToPlayerDto(Player player) {
+		return modelMapper.map(player, PlayerDto.class);
+	}
+
 }

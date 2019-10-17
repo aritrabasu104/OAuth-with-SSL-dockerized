@@ -4,11 +4,12 @@ import java.util.List;
 
 import myapp.exceptions.InvalidMatchNameException;
 import myapp.exceptions.InvalidPlayerException;
-import myapp.model.PlayerStats;
+import myapp.exceptions.InvalidPlayerStatException;
+import myapp.model.PlayerStat;
 
 public interface LeaderboardService {
-	List<PlayerStats> getLeaderBoard(String matchName,Long timeInMillis) throws InvalidMatchNameException;
+	List<PlayerStat> getLeaderBoard(String matchName,Long timeInMillis) throws InvalidMatchNameException;
 
-	List<PlayerStats> getAdjecentScoresForPlayer(Long playerId, String matchName) throws InvalidPlayerException, InvalidMatchNameException;
+	List<PlayerStat> getAdjecentScoresForPlayer(Long playerId, String matchName) throws InvalidPlayerException, InvalidMatchNameException, InvalidPlayerStatException;
 	
 }

@@ -12,32 +12,33 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @Valid
 @Entity
 @Table(indexes = { @Index(name = "ind_match", columnList = "match_id", unique = false),
 		@Index(name = "ind_player_id", columnList = "player_id", unique = false) })
-public class PlayerStats {
+public class PlayerStat {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
 	@Valid
-	@NotBlank
+	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "match_id", nullable = false)
 	private Match match;
 
 	@Valid
-	@NotBlank
+	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "player_id", nullable = false)
 	private Player player;
 	private Integer kills;
 	private Integer score;
 	private Date statTime;
-
+	private Integer rank;
+	
 	/**
 	 * @return the id
 	 */
@@ -120,6 +121,20 @@ public class PlayerStats {
 	 */
 	public void setStatTime(Date statTime) {
 		this.statTime = statTime;
+	}
+
+	/**
+	 * @return the rank
+	 */
+	public Integer getRank() {
+		return rank;
+	}
+
+	/**
+	 * @param rank the rank to set
+	 */
+	public void setRank(Integer rank) {
+		this.rank = rank;
 	}
 
 }

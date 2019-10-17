@@ -12,13 +12,13 @@ import javax.persistence.OneToMany;
 @Entity
 public class Player {
 
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
-    private String userName;
-	
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "player")
-    private List<PlayerStats> playerStats;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+	private String userName;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "player")
+	private List<PlayerStat> playerStat;
 
 	/**
 	 * @return the id
@@ -51,15 +51,15 @@ public class Player {
 	/**
 	 * @return the playerStats
 	 */
-	public List<PlayerStats> getPlayerStats() {
-		return playerStats;
+	public List<PlayerStat> getPlayerStat() {
+		return playerStat;
 	}
 
 	/**
 	 * @param playerStats the playerStats to set
 	 */
-	public void setPlayerStats(List<PlayerStats> playerStats) {
-		this.playerStats = playerStats;
+	public void setPlayerStat(List<PlayerStat> playerStat) {
+		this.playerStat = playerStat;
 	}
 
 	@Override

@@ -19,10 +19,9 @@ public class Match {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match")
-	private List<PlayerStats> playerStats;
+	private List<PlayerStat> playerStats;
 	private String matchName;
-	private Integer rank;
-	
+
 	/**
 	 * @return the id
 	 */
@@ -40,14 +39,14 @@ public class Match {
 	/**
 	 * @return the playerStats
 	 */
-	public List<PlayerStats> getPlayerStats() {
+	public List<PlayerStat> getPlayerStats() {
 		return playerStats;
 	}
 
 	/**
 	 * @param playerStats the playerStats to set
 	 */
-	public void setPlayerStats(List<PlayerStats> playerStats) {
+	public void setPlayerStats(List<PlayerStat> playerStats) {
 		this.playerStats = playerStats;
 	}
 
@@ -63,20 +62,6 @@ public class Match {
 	 */
 	public void setMatchName(String matchName) {
 		this.matchName = matchName;
-	}
-
-	/**
-	 * @return the rank
-	 */
-	public Integer getRank() {
-		return rank;
-	}
-
-	/**
-	 * @param rank the rank to set
-	 */
-	public void setRank(Integer rank) {
-		this.rank = rank;
 	}
 
 }
