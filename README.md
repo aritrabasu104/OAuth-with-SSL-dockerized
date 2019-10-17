@@ -13,6 +13,7 @@ API doc can be found at https://localhost:8443/swagger-ui.html
 #### Configurations : 
 1. aws credentials and region
 2. Facebook app Id and app secret for OAuth(Need to substitute these values in $Project/MyApp/src/main/resources/application.yml) 
+3. JAVA_HOME 
 
 #### Code assumptions : 
 Match names are unique and multiple match instances of the same type will have unique name.
